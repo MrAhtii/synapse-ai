@@ -334,7 +334,7 @@ export default function NotificationBell({ isDemo }: NotificationBellProps) {
             ref={panelRef}
             role="dialog"
             aria-label="Notifications"
-            className="absolute right-0 top-full mt-2 z-50 w-[min(calc(100vw-16px),400px)] origin-top-right animate-page-enter rounded-xl border border-border bg-card shadow-xl"
+            className="fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full mt-2 z-50 sm:w-96 max-w-md origin-top-right animate-page-enter rounded-xl border border-border bg-card shadow-xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
