@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef } from "react";
 import {
   FileText,
   BookOpen,
@@ -14,10 +13,10 @@ import {
 import PageContainer from "../components/ui/PageContainer";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
-import { createNotification } from "../lib/notifications";
 import { useDemoMode } from "../context/DemoMode";
 import { useAuth } from "../context/AuthContext";
 import { useDocuments } from "../hooks/useDocuments";
+
 interface SmartSummaryProps {
   onBack?: () => void;
 }
@@ -31,7 +30,6 @@ export default function SmartSummary({ onBack }: SmartSummaryProps) {
   const summary = latestDocument?.summary;
   const hasSummaries = documents.some((d) => d.summary_generated);
 
-  // Clean import of Crosshair for the view
   const handleBack = () => {
     if (onBack) {
       onBack();
@@ -39,20 +37,6 @@ export default function SmartSummary({ onBack }: SmartSummaryProps) {
       navigate(isDemo ? "/demo/workspace" : "/workspace");
     }
   };
-
-  // Notify once when a summary is viewed (not in demo mode)
-  const notifiedRef = useRef(false);
-  useEffect(() => {
-    if (!isDemo && !notifiedRef.current && hasSummaries) {
-      notifiedRef.current = true;
-      if (user && hasSummaries) {
-        createNotification(user.id, "Summary generated", {
-          icon: "Sparkles",
-          link: "/summary",
-        });
-      }
-    }
-  }, [isDemo, user, hasSummaries]);
 
   // If authenticated with no summaries, show empty state
   if (!isDemo && !hasSummaries) {
@@ -138,9 +122,7 @@ export default function SmartSummary({ onBack }: SmartSummaryProps) {
         </div>
 
         <div className="space-y-5 text-foreground/80 leading-relaxed text-sm sm:text-base">
-          <p>
-            {summary ?? "No summary available."}
-          </p>
+          <p>{summary ?? "No summary available."}</p>
         </div>
       </Card>
 
@@ -180,20 +162,22 @@ export default function SmartSummary({ onBack }: SmartSummaryProps) {
           </div>
         </div>
 
-<ul className="space-y-3">
-  {(latestDocument?.important_points ?? []).map((point: string, i: number) => (
-    <li key={i} className="flex items-start gap-3 group">
-      <span className="flex h-5 w-5 shrink-0 mt-0.5 items-center justify-center rounded-md border-2 border-primary/30 bg-card transition-all duration-200 group-hover:border-primary/60 group-hover:bg-primary/5">
-        <span className="text-[10px] font-bold text-primary">
-          {i + 1}
-        </span>
-      </span>
-      <span className="text-sm sm:text-base text-foreground/80 leading-relaxed">
-        {point}
-      </span>
-    </li>
-  ))}
-</ul>
+        <ul className="space-y-3">
+          {(latestDocument?.important_points ?? []).map(
+            (point: string, i: number) => (
+              <li key={i} className="flex items-start gap-3 group">
+                <span className="flex h-5 w-5 shrink-0 mt-0.5 items-center justify-center rounded-md border-2 border-primary/30 bg-card transition-all duration-200 group-hover:border-primary/60 group-hover:bg-primary/5">
+                  <span className="text-[10px] font-bold text-primary">
+                    {i + 1}
+                  </span>
+                </span>
+                <span className="text-sm sm:text-base text-foreground/80 leading-relaxed">
+                  {point}
+                </span>
+              </li>
+            )
+          )}
+        </ul>
       </Card>
 
       {/* Quick Actions */}
