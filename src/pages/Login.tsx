@@ -40,11 +40,17 @@ function InputField({
           {...props}
         />
         {rightElement && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightElement}</div>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            {rightElement}
+          </div>
         )}
       </div>
       {error && (
-        <p id={`${inputId}-error`} className="text-xs text-destructive" role="alert">
+        <p
+          id={`${inputId}-error`}
+          className="text-xs text-destructive"
+          role="alert"
+        >
           {error}
         </p>
       )}
@@ -58,7 +64,9 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {},
+  );
   const [serverError, setServerError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -123,7 +131,18 @@ export default function Login() {
           {/* Header */}
           <div className="mb-8 text-center">
             <div className="mb-4 flex justify-center">
-              <img src="/lightmodelogo.png" alt="Synapse AI" className="h-[38px] w-auto" />
+              {/* Light Mode Logo */}
+              <img
+                src="/lightmodelogo.png"
+                alt="Synapse AI"
+                className="h-[38px] w-auto block dark:hidden"
+              />
+              {/* Dark Mode Logo */}
+              <img
+                src="/darkmodelogo.png"
+                alt="Synapse AI"
+                className="h-[38px] w-auto hidden dark:block"
+              />
             </div>
             <h1 className="font-heading text-2xl font-bold text-foreground">
               Welcome back
@@ -151,7 +170,9 @@ export default function Login() {
               type="email"
               placeholder="you@example.com"
               value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setEmail(e.target.value)
+              }
               error={errors.email}
               autoComplete="email"
             />
@@ -163,7 +184,9 @@ export default function Login() {
               type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
               value={password}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setPassword(e.target.value)
+              }
               error={errors.password}
               autoComplete="current-password"
               rightElement={
@@ -191,7 +214,12 @@ export default function Login() {
             </div>
 
             {/* Submit */}
-            <Button type="submit" className="w-full" isLoading={isLoading} size="lg">
+            <Button
+              type="submit"
+              className="w-full"
+              isLoading={isLoading}
+              size="lg"
+            >
               <LogIn size={18} />
               Sign In
             </Button>

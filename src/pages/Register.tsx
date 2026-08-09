@@ -186,7 +186,18 @@ export default function Register() {
           {/* Header */}
           <div className="mb-8 text-center">
             <div className="mb-4 flex justify-center">
-              <img src="/lightmodelogo.png" alt="Synapse AI" className="h-[38px] w-auto" />
+              {/* Light Mode Logo */}
+              <img
+                src="/lightmodelogo.png"
+                alt="Synapse AI"
+                className="h-[38px] w-auto block dark:hidden"
+              />
+              {/* Dark Mode Logo */}
+              <img
+                src="/darkmodelogo.png"
+                alt="Synapse AI"
+                className="h-[38px] w-auto hidden dark:block"
+              />
             </div>
             <h1 className="font-heading text-2xl font-bold text-foreground">
               Create your account
