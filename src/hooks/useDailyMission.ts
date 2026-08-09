@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
-import { completeMissionTask, STATS_CHANGED_EVENT, notifyStatsChanged } from "./useDashboardStats";
+import { completeMissionTask, STATS_CHANGED_EVENT } from "./useDashboardStats";
 import { createNotification } from "../lib/notifications";
 import type { User } from "@supabase/supabase-js";
 
@@ -78,39 +78,42 @@ export function useDailyMission(user: User | null) {
     return () => window.removeEventListener(STATS_CHANGED_EVENT, handler);
   }, [refresh]);
 
-  const toggleTask = useCallback(
-    async (key: string, completed: boolean) => {
-      const def = MISSION_TASKS.find((t) => t.key === key);
-      if (!def || !user) return;
+const toggleTask = useCallback(
+  async (key: string, completed: boolean) => {
+    const def = MISSION_TASKS.find((t) => t.key === key);
+    if (!def || !user) return;
 
-      // Optimistic update
-      let newAllDone = false;
-      setTasks((prev) => {
-        const updated = prev.map((t) =>
-          t.key === key ? { ...t, completed } : t,
-        );
-        newAllDone = updated.every((t) => t.completed);
-        return updated;
+    // Calculate the resulting state before updating React state
+    const updatedTasks = tasks.map((t) =>
+      t.key === key ? { ...t, completed } : t,
+    );
+
+    const newAllDone = updatedTasks.every((t) => t.completed);
+
+    // Optimistic update
+    setTasks(updatedTasks);
+
+    // Save task completion + award XP through Supabase RPC
+    await completeMissionTask(def, completed);
+
+    // Notify when all tasks are completed
+    if (completed && newAllDone) {
+      const totalXp =
+        MISSION_TASKS.reduce((sum, task) => sum + task.xp, 0) +
+        MISSION_BONUS_XP;
+
+      createNotification(user.id, "Daily mission completed!", {
+        body: `All tasks done! You earned ${totalXp} XP today.`,
+        icon: "Target",
+        link: "/missions",
       });
+    }
 
-      await completeMissionTask(def, completed);
-
-      // Notify when all tasks are completed
-      if (completed && newAllDone) {
-        const totalXp =
-          MISSION_TASKS.reduce((s, t) => s + t.xp, 0) + MISSION_BONUS_XP;
-        createNotification(user.id, "Daily mission completed!", {
-          body: `All tasks done! You earned ${totalXp} XP today.`,
-          icon: "Target",
-          link: "/missions",
-        });
-      }
-
-      // Re-fetch to sync
-      await refresh();
-    },
-    [user?.id, refresh],
-  );
+    // Re-fetch from database to make sure UI matches saved state
+    await refresh();
+  },
+  [user, tasks, refresh],
+);
 
   const completedCount = tasks.filter((t) => t.completed).length;
   const totalCount = tasks.length;

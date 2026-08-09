@@ -41,17 +41,15 @@ const WEEKDAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 /** Build an array of 7 DayData items ending today (Mon → Sun if today is Sun). */
 function buildEmptyWeek(): DayData[] {
-  const now = new Date();
-  const todayIdx = now.getDay(); // 0=Sun
-  const result: DayData[] = [];
-  // last 7 days: day = Mon(1)..Sun(0) aligned to the current week
-  // We want Mon..Sun in order. Generate 7 days ending today.
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    result.push({ day: WEEKDAY_SHORT[d.getDay()], value: 0 });
-  }
-  return result;
+  return [
+    { day: "Mon", value: 0 },
+    { day: "Tue", value: 0 },
+    { day: "Wed", value: 0 },
+    { day: "Thu", value: 0 },
+    { day: "Fri", value: 0 },
+    { day: "Sat", value: 0 },
+    { day: "Sun", value: 0 },
+  ];
 }
 
 /* ─────────────── Hook ─────────────── */
@@ -144,7 +142,7 @@ export function useAnalytics(user: User | null) {
     const mapped: ActivityItem[] = (logRows ?? []).map((row) => ({
       label: row.detail
         ? row.detail
-        : row.action.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        : row.action.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()),
       icon: row.icon ?? "default",
       time: formatRelativeTime(row.created_at),
     }));

@@ -11,6 +11,8 @@ interface UseNotificationsReturn {
   isLoading: boolean;
   markAsRead: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
+  clearAllNotifications: () => Promise<void>;
+  deleteNotification: (id: string) => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -71,17 +73,24 @@ export function useNotifications(user: User | null): UseNotificationsReturn {
 
   const markAsRead = useCallback(
     async (id: string) => {
+      if (!user) return;
+
       // Optimistic update
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)),
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
       );
 
-      await supabase
+      const { error } = await supabase
         .from("notifications")
         .update({ is_read: true })
-        .eq("id", id);
+        .eq("id", id)
+        .eq("user_id", user.id);
+
+      if (error) {
+        await refresh();
+      }
     },
-    [],
+    [user?.id, refresh],
   );
 
   const markAllAsRead = useCallback(async () => {
@@ -97,12 +106,50 @@ export function useNotifications(user: User | null): UseNotificationsReturn {
       .eq("is_read", false);
   }, [user?.id]);
 
+  const clearAllNotifications = useCallback(async () => {
+    if (!user) return;
+
+    // Optimistic update
+    setNotifications([]);
+
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("user_id", user.id);
+
+    if (error) {
+      await refresh();
+    }
+  }, [user?.id, refresh]);
+
+  const deleteNotification = useCallback(
+    async (id: string) => {
+      if (!user) return;
+
+      // Optimistic update
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+
+      const { error } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id);
+
+      if (error) {
+        await refresh();
+      }
+    },
+    [user?.id, refresh],
+  );
+
   return {
     notifications,
     unreadCount,
     isLoading,
     markAsRead,
     markAllAsRead,
+    clearAllNotifications,
+    deleteNotification,
     refresh,
   };
 }

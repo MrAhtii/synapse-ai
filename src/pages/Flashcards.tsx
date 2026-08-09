@@ -1,9 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-
-interface FlashcardsProps {
-  onBack?: () => void;
-}
 import {
   ArrowLeft,
   ArrowRight,
@@ -21,56 +17,36 @@ import { useDocuments } from "../hooks/useDocuments";
 import { recordFlashcardsReviewed } from "../hooks/useDashboardStats";
 import { createNotification } from "../lib/notifications";
 
-interface FlashcardData {
-  id: number;
+interface FlashcardsProps {
+  onBack?: () => void;
+}
+
+interface FlashcardItem {
+  id?: number | string;
   topic: string;
   question: string;
   answer: string;
 }
 
-const flashcards: FlashcardData[] = [
+// Fallback flashcards for Demo Mode when no uploaded documents exist
+const DEMO_FLASHCARDS: FlashcardItem[] = [
   {
     id: 1,
-    topic: "JavaScript Variables",
-    question: "What is the difference between var, let, and const?",
-    answer:
-      "var is function-scoped and can be redeclared. let is block-scoped and can be reassigned but not redeclared. const is block-scoped and cannot be reassigned or redeclared — it must be initialised at declaration.",
+    topic: "JavaScript Async",
+    question: "What is the key difference between synchronous and asynchronous code execution?",
+    answer: "Synchronous code executes line-by-line, blocking subsequent operations until completion. Asynchronous code allows long-running operations to run in the background without blocking the main execution thread."
   },
   {
     id: 2,
-    topic: "Closures",
-    question: "What is a closure in JavaScript?",
-    answer:
-      "A closure is a function that retains access to variables from its outer (enclosing) scope even after the outer function has finished executing. It 'closes over' those variables, preserving them for later use.",
+    topic: "DOM Manipulation",
+    question: "What does event delegation mean in JavaScript?",
+    answer: "Event delegation is a technique of attaching a single event listener to a parent element to manage events for all of its existing or future child elements using event bubbling."
   },
   {
-    id: 3,
-    topic: "Promises",
-    question: "What is a Promise and what states can it be in?",
-    answer:
-      "A Promise is an object representing the eventual completion or failure of an asynchronous operation. It can be in one of three states: pending (initial state), fulfilled (operation completed successfully), or rejected (operation failed).",
-  },
-  {
-    id: 4,
-    topic: "Async/Await",
-    question: "What does the async keyword do, and how does await work?",
-    answer:
-      "The async keyword declares a function that always returns a Promise. The await keyword pauses the execution of the async function until the awaited Promise settles, then resumes with the resolved value — making asynchronous code read like synchronous code.",
-  },
-  {
-    id: 5,
-    topic: "Event Loop",
-    question: "How does the JavaScript event loop work?",
-    answer:
-      "The event loop continuously checks the call stack and the callback queue. If the call stack is empty, it takes the first callback from the queue and pushes it onto the stack for execution. This enables non-blocking I/O despite JavaScript being single-threaded.",
-  },
-  {
-    id: 6,
-    topic: "Hoisting",
-    question: "What is hoisting in JavaScript?",
-    answer:
-      "Hoisting is JavaScript's default behaviour of moving declarations to the top of their containing scope during compilation. Function declarations are hoisted entirely, while var declarations are hoisted but not initialised — accessing them before declaration returns undefined. let and const are hoisted but not initialised, causing a Temporal Dead Zone.",
-  },
+    topic: "Web Development",
+    question: "What is the difference between 'let', 'const', and 'var'?",
+    answer: "'var' is function-scoped and hoisted. 'let' and 'const' are block-scoped. 'const' prevents re-assignment of the variable identifier."
+  }
 ];
 
 export default function Flashcards({ onBack }: FlashcardsProps) {
@@ -79,42 +55,17 @@ export default function Flashcards({ onBack }: FlashcardsProps) {
   const { user } = useAuth();
   const { documents } = useDocuments(isDemo ? null : user);
   const hasDocs = documents.length > 0;
+  const latestDocument = documents[0];
+
+  // Resolve flashcards source based on context
+  const docFlashcards = latestDocument?.flashcards;
+  const flashcards: FlashcardItem[] = isDemo
+    ? (docFlashcards && docFlashcards.length > 0 ? docFlashcards : DEMO_FLASHCARDS)
+    : (docFlashcards ?? []);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [didRecord, setDidRecord] = useState(false);
-
-  // If authenticated with no documents, show empty state
-  if (!isDemo && !hasDocs) {
-    return (
-      <PageContainer>
-        <div className="mb-8">
-          <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground">
-            AI Flashcards
-          </h1>
-          <p className="mt-2 text-foreground/60 text-base sm:text-lg max-w-2xl">
-            AI-generated flashcards for active recall — coming soon.
-          </p>
-        </div>
-
-        <Card className="flex flex-col items-center justify-center py-16 px-6 text-center">
-          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Brain size={28} />
-          </div>
-          <h2 className="font-heading text-xl font-bold text-foreground mb-2">
-            AI Flashcard generation is coming soon
-          </h2>
-          <p className="text-sm text-foreground/60 max-w-md mb-6">
-            Your uploaded notes will automatically generate smart flashcards
-            once AI processing is enabled.
-          </p>
-          <Button variant="primary" size="lg" onClick={() => navigate(isDemo ? "/demo/upload" : "/upload")}>
-            <Upload size={18} />
-            Upload Notes
-          </Button>
-        </Card>
-      </PageContainer>
-    );
-  }
+  const didRecord = useRef(false);
 
   const card = flashcards[currentIndex];
   const total = flashcards.length;
@@ -123,10 +74,16 @@ export default function Flashcards({ onBack }: FlashcardsProps) {
 
   // Record flashcards reviewed once when user reaches the last card
   useEffect(() => {
-    if (!isDemo && !didRecord && currentIndex === total - 1) {
-      setDidRecord(true);
+    if (
+      !isDemo &&
+      !didRecord.current &&
+      total > 0 &&
+      currentIndex === total - 1
+    ) {
+      didRecord.current = true;
+
       recordFlashcardsReviewed(total);
-      // Fire-and-forget notification
+
       if (user) {
         createNotification(user.id, "Flashcards reviewed", {
           body: `You reviewed all ${total} flashcards. Keep up the momentum!`,
@@ -135,15 +92,12 @@ export default function Flashcards({ onBack }: FlashcardsProps) {
         });
       }
     }
-  }, [isDemo, didRecord, currentIndex, total, user]);
+  }, [isDemo, currentIndex, total, user]);
 
-  const goTo = useCallback(
-    (index: number) => {
-      setCurrentIndex(index);
-      setIsFlipped(false);
-    },
-    []
-  );
+  const goTo = useCallback((index: number) => {
+    setCurrentIndex(index);
+    setIsFlipped(false);
+  }, []);
 
   const goPrev = useCallback(() => {
     if (hasPrev) goTo(currentIndex - 1);
@@ -156,6 +110,48 @@ export default function Flashcards({ onBack }: FlashcardsProps) {
   const toggleFlip = useCallback(() => {
     setIsFlipped((prev) => !prev);
   }, []);
+
+  // If not in demo mode and no flashcards exist, show empty state
+  if (!isDemo && (!hasDocs || flashcards.length === 0)) {
+    return (
+      <PageContainer>
+        <div className="mb-8">
+          <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground">
+            AI Flashcards
+          </h1>
+          <p className="mt-2 text-foreground/60 text-base sm:text-lg max-w-2xl">
+            AI-generated flashcards for active recall.
+          </p>
+        </div>
+
+        <Card className="flex flex-col items-center justify-center py-16 px-6 text-center">
+          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Brain size={28} />
+          </div>
+          <h2 className="font-heading text-xl font-bold text-foreground mb-2">
+            No flashcards available yet
+          </h2>
+          <p className="text-sm text-foreground/60 max-w-md mb-6">
+            Flashcards could not be generated for this document yet. Try
+            uploading your notes again.
+          </p>
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={() => navigate(isDemo ? "/demo/upload" : "/upload")}
+          >
+            <Upload size={18} />
+            Upload Notes
+          </Button>
+        </Card>
+      </PageContainer>
+    );
+  }
+
+  // Safety fallback check to prevent rendering empty card state
+  if (!card) {
+    return null;
+  }
 
   return (
     <PageContainer>
@@ -184,7 +180,7 @@ export default function Flashcards({ onBack }: FlashcardsProps) {
 
       {/* Flashcard with 3D flip */}
       <div
-        className="perspective-[1200px] mb-6"
+        className="perspective-[1200px] mb-6 cursor-pointer"
         role="button"
         tabIndex={0}
         aria-label={
@@ -264,7 +260,11 @@ export default function Flashcards({ onBack }: FlashcardsProps) {
         <Button
           variant="ghost"
           size="md"
-          onClick={() => (onBack ? onBack() : navigate(isDemo ? "/demo/workspace" : "/workspace"))}
+          onClick={() =>
+            onBack
+              ? onBack()
+              : navigate(isDemo ? "/demo/workspace" : "/workspace")
+          }
         >
           <ArrowLeft size={16} />
           Back to Learning Workspace

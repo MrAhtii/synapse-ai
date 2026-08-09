@@ -1,14 +1,12 @@
 import {
   Target,
   BookOpen,
-  Clock,
   CheckCircle2,
   Upload,
   Sparkles,
   Flame,
   Brain,
   BarChart3,
-  Zap,
   Trophy,
   Layers,
   ArrowRight,
@@ -244,7 +242,7 @@ export default function Dashboard() {
   const { documents } = useDocuments(isDemo ? null : user);
   const documentCount = isDemo ? 12 : documents.length;
   const { stats, isLoading: statsLoading } = useDashboardStats(isDemo ? null : user, documentCount);
-  const { tasks: missionTasks, completedCount: mCompleted, totalCount: mTotal, xpEarned: mXp, xpTarget: mXpTotal, allDone: mAllDone } =
+  const { tasks: missionTasks, completedCount: mCompleted, totalCount: mTotal, xpEarned: mXp, xpTarget: mXpTotal} =
     useDailyMission(isDemo ? null : user);
   const { weekly, hasWeeklyActivity } = useAnalytics(isDemo ? null : user);
 

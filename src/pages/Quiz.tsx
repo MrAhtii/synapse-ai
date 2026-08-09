@@ -1,6 +1,14 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Brain, ArrowLeft, RotateCcw, CheckCircle2, XCircle, Award, Upload } from "lucide-react";
+import {
+  Brain,
+  ArrowLeft,
+  RotateCcw,
+  CheckCircle2,
+  XCircle,
+  Award,
+  Upload,
+} from "lucide-react";
 import PageContainer from "../components/ui/PageContainer";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
@@ -22,75 +30,42 @@ interface Question {
   explanation: string;
 }
 
-const questions: Question[] = [
+const OPTION_LABELS = ["A", "B", "C", "D"];
+
+// Default questions to use in Demo Mode when no uploaded document exists
+const DEMO_QUESTIONS: Question[] = [
   {
     id: 1,
-    question: "What is the difference between == and === in JavaScript?",
+    question: "What is the primary function of JavaScript promises?",
     options: [
-      "== compares values, === compares types",
-      "== compares values with type coercion, === compares values and types without coercion",
-      "They are interchangeable",
-      "=== is only for numbers",
+      "To handle asynchronous operations without blocking thread execution",
+      "To optimize CSS animation performance",
+      "To compile client-side code directly into machine code",
+      "To manipulate DOM elements in synchronous loops"
     ],
-    correctIndex: 1,
-    explanation:
-      "== performs type coercion before comparing (e.g., 1 == '1' is true), while === compares both value and type without coercion (1 === '1' is false). Always prefer === to avoid unexpected results.",
+    correctIndex: 0,
+    explanation: "Promises represent a value that may be available now, in the future, or never, allowing structured async programming."
   },
   {
     id: 2,
-    question: "What does the .map() method return?",
-    options: [
-      "A new array with transformed elements",
-      "The original array modified in place",
-      "A boolean indicating success",
-      "A single reduced value",
-    ],
-    correctIndex: 0,
-    explanation:
-      ".map() creates a new array populated with the results of calling a provided function on every element in the original array. It does not mutate the original array — it's pure.",
+    question: "Which keyword is used to declare block-scoped variables in modern JavaScript?",
+    options: ["var", "let", "global", "define"],
+    correctIndex: 1,
+    explanation: "'let' and 'const' are block-scoped, while 'var' is function-scoped."
   },
   {
     id: 3,
-    question: "How do you create a promise in JavaScript?",
+    question: "What is the event loop's main role in JavaScript?",
     options: [
-      "new Promise(function(resolve, reject) { ... })",
-      "Promise.create(function(resolve, reject) { ... })",
-      "new Promise(resolve, reject => { ... })",
-      "Promise.new((resolve, reject) => { ... })",
-    ],
-    correctIndex: 0,
-    explanation:
-      "A Promise is created with the 'new' keyword and receives an executor function with two parameters: resolve and reject. The executor runs immediately when the Promise is constructed.",
-  },
-  {
-    id: 4,
-    question: "Which of the following is NOT a valid JavaScript data type?",
-    options: [
-      "Symbol",
-      "BigInt",
-      "Integer",
-      "Undefined",
-    ],
-    correctIndex: 2,
-    explanation:
-      'JavaScript has dynamic typing with types such as Number, String, Boolean, Object, Symbol, BigInt, Undefined, and Null. "Integer" is not a separate type — all numbers are either Number or BigInt.',
-  },
-  {
-    id: 5,
-    question: "What does the 'this' keyword refer to inside a regular function in the browser?",
-    options: [
-      "The function itself",
-      "The global object (window)",
-      "The parent object",
-      "undefined",
+      "To manage memory allocation in the heap",
+      "To monitor the call stack and message queue to execute async callbacks",
+      "To compile JavaScript code into bytecode",
+      "To handle HTTP requests directly"
     ],
     correctIndex: 1,
-    explanation:
-      "In a regular function (not an arrow function) called in the global execution context, 'this' refers to the global object — which in browsers is the window object. Arrow functions inherit 'this' from the enclosing scope instead.",
-  },
+    explanation: "The event loop checks if the call stack is empty and pulls callback functions from the task queue."
+  }
 ];
-
-const OPTION_LABELS = ["A", "B", "C", "D"];
 
 export default function Quiz({ onBack }: QuizProps) {
   const navigate = useNavigate();
@@ -98,77 +73,60 @@ export default function Quiz({ onBack }: QuizProps) {
   const { user } = useAuth();
   const { documents } = useDocuments(isDemo ? null : user);
   const hasDocs = documents.length > 0;
+  const latestDocument = documents[0];
+
+  // Extract document questions if available
+  const docQuestions = latestDocument?.quiz?.map((q, index) => ({
+    id: index + 1,
+    question: q.question,
+    options: q.options,
+    correctIndex: q.correctIndex,
+    explanation: q.explanation,
+  }));
+
+  // Fallback to DEMO_QUESTIONS if in demo mode and no document questions exist
+  const questions: Question[] = isDemo
+    ? (docQuestions && docQuestions.length > 0 ? docQuestions : DEMO_QUESTIONS)
+    : (docQuestions ?? []);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [checkedSet, setCheckedSet] = useState<Set<number>>(new Set());
   const [showResults, setShowResults] = useState(false);
-
-  // If authenticated with no documents, show empty state
-  if (!isDemo && !hasDocs) {
-    return (
-      <PageContainer>
-        <div className="mb-8">
-          <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground">
-            AI Quiz
-          </h1>
-          <p className="mt-2 text-foreground/60 text-base sm:text-lg max-w-2xl">
-            AI-generated quizzes to test your knowledge — coming soon.
-          </p>
-        </div>
-
-        <Card className="flex flex-col items-center justify-center py-16 px-6 text-center">
-          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Brain size={28} />
-          </div>
-          <h2 className="font-heading text-xl font-bold text-foreground mb-2">
-            AI Quiz generation is coming soon
-          </h2>
-          <p className="text-sm text-foreground/60 max-w-md mb-6">
-            Your uploaded notes will automatically generate personalized quizzes
-            once AI processing is enabled.
-          </p>
-          <Button variant="primary" size="lg" onClick={() => navigate(isDemo ? "/demo/upload" : "/upload")}>
-            <Upload size={18} />
-            Upload Notes
-          </Button>
-        </Card>
-      </PageContainer>
-    );
-  }
-
+  const hasRecordedResult = useRef(false);
   const question = questions[currentIndex];
   const total = questions.length;
   const hasPrev = currentIndex > 0;
   const isLast = currentIndex === total - 1;
-  const selectedAnswer = answers[question.id] ?? null;
-  const isChecked = checkedSet.has(question.id);
+  const selectedAnswer = question ? (answers[question.id] ?? null) : null;
+  const isChecked = question ? checkedSet.has(question.id) : false;
   const checkedCount = checkedSet.size;
 
   const score = questions.reduce(
-    (sum, q) => (checkedSet.has(q.id) && answers[q.id] === q.correctIndex ? sum + 1 : sum),
-    0
+    (sum, q) =>
+      checkedSet.has(q.id) && answers[q.id] === q.correctIndex ? sum + 1 : sum,
+    0,
   );
+const selectAnswer = useCallback(
+  (optionIndex: number) => {
+    if (!question || isChecked) return;
 
-  const selectAnswer = useCallback(
-    (optionIndex: number) => {
-      if (isChecked) return;
-      setAnswers((prev) => ({
-        ...prev,
-        [question.id]: optionIndex,
-      }));
-    },
-    [isChecked, question.id]
-  );
+    setAnswers((prev) => ({
+      ...prev,
+      [question.id]: optionIndex,
+    }));
+  },
+  [isChecked, question],
+);
+ 
+const checkAnswer = useCallback(() => {
+  if (!question || selectedAnswer === null) return;
 
-  const checkAnswer = useCallback(() => {
-    if (selectedAnswer === null) return;
-    setCheckedSet((prev) => {
-      const next = new Set(prev);
-      next.add(question.id);
-      return next;
-    });
-  }, [selectedAnswer, question.id]);
-
+  setCheckedSet((prev) => {
+    const next = new Set(prev);
+    next.add(question.id);
+    return next;
+  });
+}, [selectedAnswer, question]);
   const goNext = useCallback(() => {
     if (currentIndex < total - 1) setCurrentIndex((i) => i + 1);
   }, [currentIndex, total]);
@@ -176,29 +134,34 @@ export default function Quiz({ onBack }: QuizProps) {
   const goPrev = useCallback(() => {
     if (hasPrev) setCurrentIndex((i) => i - 1);
   }, [hasPrev]);
+const submitQuiz = useCallback(async () => {
+  setShowResults(true);
 
-  const submitQuiz = useCallback(async () => {
-    setShowResults(true);
-    if (!isDemo) {
-      const percentage = Math.round((score / questions.length) * 100);
-      await recordQuizCompleted(percentage);
-      // Fire-and-forget notification
-      if (user) {
-        createNotification(user.id, "Quiz completed", {
-          body: `You scored ${percentage}% on the JavaScript quiz.`,
-          icon: "Brain",
-          link: "/quiz",
-        });
-      }
-    }
-  }, [isDemo, score, user]);
+  if (isDemo || hasRecordedResult.current) return;
 
-  const retake = useCallback(() => {
-    setAnswers({});
-    setCheckedSet(new Set());
-    setCurrentIndex(0);
-    setShowResults(false);
-  }, []);
+  hasRecordedResult.current = true;
+
+  const percentage = Math.round((score / questions.length) * 100);
+
+  await recordQuizCompleted(percentage);
+
+  if (user) {
+    createNotification(user.id, "Quiz completed", {
+      body: `You scored ${percentage}% on your AI-generated quiz.`,
+      icon: "Brain",
+      link: "/quiz",
+    });
+  }
+}, [isDemo, score, questions.length, user]);
+
+const retake = useCallback(() => {
+  hasRecordedResult.current = false;
+
+  setAnswers({});
+  setCheckedSet(new Set());
+  setCurrentIndex(0);
+  setShowResults(false);
+}, []);
 
   const handleBack = useCallback(() => {
     if (onBack) {
@@ -208,6 +171,42 @@ export default function Quiz({ onBack }: QuizProps) {
     }
   }, [onBack, navigate, isDemo]);
 
+  // If authenticated with no documents, show empty state
+  if (!isDemo && (!hasDocs || questions.length === 0)) {
+    return (
+      <PageContainer>
+        <div className="mb-8">
+          <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground">
+            AI Quiz
+          </h1>
+          <p className="mt-2 text-foreground/60 text-base sm:text-lg max-w-2xl">
+            AI-generated quizzes to test your knowledge.
+          </p>
+        </div>
+
+        <Card className="flex flex-col items-center justify-center py-16 px-6 text-center">
+          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Brain size={28} />
+          </div>
+          <h2 className="font-heading text-xl font-bold text-foreground mb-2">
+            No quiz available yet
+          </h2>
+          <p className="text-sm text-foreground/60 max-w-md mb-6">
+            A quiz could not be generated for this document yet. Try uploading
+            your notes again.
+          </p>
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={() => navigate(isDemo ? "/demo/upload" : "/upload")}
+          >
+            <Upload size={18} />
+            Upload Notes
+          </Button>
+        </Card>
+      </PageContainer>
+    );
+  }
   // ---- Results View ----
   if (showResults) {
     const correctCount = score;
@@ -247,7 +246,9 @@ export default function Quiz({ onBack }: QuizProps) {
           <h2 className="font-heading text-4xl sm:text-5xl font-bold text-foreground mt-4">
             {correctCount}/{total}
           </h2>
-          <p className="text-2xl font-semibold text-primary mt-1">{percentage}%</p>
+          <p className="text-2xl font-semibold text-primary mt-1">
+            {percentage}%
+          </p>
           <div className="mt-5 w-full bg-muted rounded-full h-2 max-w-xs mx-auto overflow-hidden">
             <div
               className="h-full rounded-full bg-primary transition-all duration-500"
@@ -277,7 +278,10 @@ export default function Quiz({ onBack }: QuizProps) {
                     <XCircle size={16} className="shrink-0" />
                   )}
                   <span>
-                    Q{idx + 1}: {q.question.length > 50 ? q.question.slice(0, 50) + "…" : q.question}
+                    Q{idx + 1}:{" "}
+                    {q.question.length > 50
+                      ? q.question.slice(0, 50) + "…"
+                      : q.question}
                   </span>
                 </div>
               );
@@ -301,7 +305,8 @@ export default function Quiz({ onBack }: QuizProps) {
   }
 
   // ---- Quiz View ----
-  const isCorrect = isChecked && selectedAnswer === question.correctIndex;
+const isCorrect =
+  !!question && isChecked && selectedAnswer === question.correctIndex;
 
   return (
     <PageContainer>
@@ -355,7 +360,8 @@ export default function Quiz({ onBack }: QuizProps) {
             const isSelected = selectedAnswer === idx;
             const isCorrectOption = idx === question.correctIndex;
 
-            let optionBorder = "border-border bg-card hover:border-primary/40 hover:bg-primary/[0.02]";
+            let optionBorder =
+              "border-border bg-card hover:border-primary/40 hover:bg-primary/[0.02]";
             let optionBadge = "bg-muted text-foreground/50";
             let optionText = "text-foreground/75";
 
@@ -423,7 +429,10 @@ export default function Quiz({ onBack }: QuizProps) {
           >
             <div className="flex items-start gap-2">
               {isCorrect ? (
-                <CheckCircle2 size={18} className="shrink-0 mt-0.5 text-emerald-600" />
+                <CheckCircle2
+                  size={18}
+                  className="shrink-0 mt-0.5 text-emerald-600"
+                />
               ) : (
                 <XCircle size={18} className="shrink-0 mt-0.5 text-rose-600" />
               )}
@@ -458,21 +467,13 @@ export default function Quiz({ onBack }: QuizProps) {
         )}
 
         {isChecked && !isLast && (
-          <Button
-            variant="primary"
-            size="md"
-            onClick={goNext}
-          >
+          <Button variant="primary" size="md" onClick={goNext}>
             Next Question
           </Button>
         )}
 
         {isChecked && isLast && (
-          <Button
-            variant="primary"
-            size="md"
-            onClick={submitQuiz}
-          >
+          <Button variant="primary" size="md" onClick={submitQuiz}>
             <Award size={16} />
             See Results
           </Button>

@@ -7,10 +7,21 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build output
 dist
 dist-ssr
+
+# Local environment files
 *.local
+.env
+.env.local
+.env.*.local
+
+# TypeScript
+tsconfig.tsbuildinfo
 
 # Editor directories and files
 .vscode/*
@@ -22,4 +33,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.env

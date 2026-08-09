@@ -66,8 +66,24 @@ export async function recordUserActivity(event: ActivityEvent): Promise<void> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
   if (!user) return;
-  await supabase.rpc("record_user_activity", { p_event: event });
+
+  // Pass flat parameters or spread JSON expected by Postgres
+  const { error } = await supabase.rpc("record_user_activity", {
+    p_user_id: user.id,
+    p_type: event.type,
+    p_task_key: event.type === "mission_task" ? event.task_key : null,
+    p_task_label: event.type === "mission_task" ? event.task_label : null,
+    p_task_xp: event.type === "mission_task" ? event.task_xp : null,
+    p_completed: event.type === "mission_task" ? event.completed : null,
+  });
+
+  if (error) {
+    console.error("record_user_activity RPC error:", error);
+    throw error;
+  }
+
   notifyStatsChanged();
 }
 

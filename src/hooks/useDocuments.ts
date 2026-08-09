@@ -1,10 +1,26 @@
+import { generateSummary } from "../lib/gemini";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "../lib/supabase";
-import { notifyStatsChanged, recordUpload } from "./useDashboardStats";
+import { extractTextFromPDF } from "../lib/pdf";
+import {
+  notifyStatsChanged,
+  recordUpload,
+  recordSummaryGenerated,
+} from "./useDashboardStats";
 import type { User } from "@supabase/supabase-js";
 
 /* ─────────────── Types ─────────────── */
-
+export interface FlashcardData {
+  topic: string;
+  question: string;
+  answer: string;
+}
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
 export interface DocumentRow {
   id: string;
   user_id: string;
@@ -15,14 +31,23 @@ export interface DocumentRow {
   uploaded_at: string;
   processing_status: "Pending" | "Processing" | "Completed";
   summary_generated: boolean;
-}
 
+  // AI-generated content
+  summary: string | null;
+  key_topics: string[] | null;
+  important_points: string[] | null;
+  flashcards: FlashcardData[] | null;
+  quiz: QuizQuestion[] | null;
+}
 /* ─────────────── Validation ─────────────── */
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
 
 export function validatePdf(file: File): string | null {
-  if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
+  if (
+    !file.name.toLowerCase().endsWith(".pdf") &&
+    file.type !== "application/pdf"
+  ) {
     return "Only PDF files can be uploaded.";
   }
   if (file.size > MAX_FILE_SIZE) {
@@ -48,7 +73,10 @@ function uploadWithProgress(
 
     xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
     xhr.setRequestHeader("apikey", SUPABASE_ANON_KEY);
-    xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+    xhr.setRequestHeader(
+      "Content-Type",
+      file.type || "application/octet-stream",
+    );
 
     xhr.upload.onprogress = (e: ProgressEvent) => {
       if (e.lengthComputable) {
@@ -72,7 +100,9 @@ function uploadWithProgress(
     };
 
     xhr.onerror = () => {
-      resolve("Network error while uploading. Please check your connection and try again.");
+      resolve(
+        "Network error while uploading. Please check your connection and try again.",
+      );
     };
 
     xhr.send(file);
@@ -128,7 +158,11 @@ export function useDocuments(user: User | null) {
       /** UUID of the newly created document row, or null on failure. */
       documentId: string | null;
     }> => {
-      if (!user) return { error: "You must be signed in to upload notes.", documentId: null };
+      if (!user)
+        return {
+          error: "You must be signed in to upload notes.",
+          documentId: null,
+        };
 
       const validationError = validatePdf(file);
       if (validationError) return { error: validationError, documentId: null };
@@ -141,11 +175,22 @@ export function useDocuments(user: User | null) {
         data: { session },
       } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        return { error: "Session expired. Please sign in again.", documentId: null };
+        return {
+          error: "Session expired. Please sign in again.",
+          documentId: null,
+        };
       }
 
-      const uploadError = await uploadWithProgress(file, path, session.access_token, onProgress);
+      const uploadError = await uploadWithProgress(
+        file,
+        path,
+        session.access_token,
+        onProgress,
+      );
       if (uploadError) return { error: uploadError, documentId: null };
+      const pdfText = await extractTextFromPDF(file);
+      const summary = await generateSummary(pdfText);
+      console.log(summary);
 
       // Insert DB row
       const { data: inserted, error: insertError } = await supabase
@@ -156,23 +201,34 @@ export function useDocuments(user: User | null) {
           file_name: file.name,
           file_url: path,
           file_size: file.size,
-          processing_status: "Pending",
-          summary_generated: false,
+
+          summary: summary.summary,
+          key_topics: summary.keyTopics,
+          important_points: summary.importantPoints,
+          flashcards: summary.flashcards,
+          quiz: summary.quiz,
+
+          processing_status: "Completed",
+          summary_generated: true,
         })
         .select()
         .single();
 
       if (insertError) {
         // Clean up orphaned storage file
-        await supabase.storage.from("documents").remove([path]).catch(() => {});
+        await supabase.storage
+          .from("documents")
+          .remove([path])
+          .catch(() => {});
         return {
-          error: "Your file was uploaded but we couldn't save it to your account. Please try again.",
+          error:
+            "Your file was uploaded but we couldn't save it to your account. Please try again.",
           documentId: null,
         };
       }
-
       await refresh();
       await recordUpload(inserted.title || file.name.replace(/\.pdf$/i, ""));
+      await recordSummaryGenerated(inserted.title);
       return { error: null, documentId: inserted.id };
     },
     [user?.id, refresh],
@@ -182,10 +238,14 @@ export function useDocuments(user: User | null) {
   const deleteDocument = useCallback(
     async (doc: DocumentRow): Promise<string | null> => {
       if (!user) return "You must be signed in.";
-      if (doc.user_id !== user.id) return "You don't have permission to delete this document.";
+      if (doc.user_id !== user.id)
+        return "You don't have permission to delete this document.";
 
       // Delete storage file (best-effort)
-      await supabase.storage.from("documents").remove([doc.file_url]).catch(() => {});
+      await supabase.storage
+        .from("documents")
+        .remove([doc.file_url])
+        .catch(() => {});
 
       const { error } = await supabase
         .from("documents")

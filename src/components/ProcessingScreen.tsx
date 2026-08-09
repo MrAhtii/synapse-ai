@@ -10,7 +10,7 @@ import {
   FileSearch,
   FileText,
   Layers,
-  ListChecks,
+  Brain,
   Target,
   BarChart3,
 } from "lucide-react";
@@ -27,14 +27,38 @@ interface Step {
 /* ─────────────── Steps definition ─────────────── */
 
 const STEPS: Omit<Step, "status">[] = [
-  { id: "upload", icon: <Upload size={16} />, label: "Upload Complete" },
-  { id: "reading", icon: <BookOpen size={16} />, label: "Reading document..." },
-  { id: "extracting", icon: <FileSearch size={16} />, label: "Extracting important concepts..." },
-  { id: "summary", icon: <FileText size={16} />, label: "Generating Smart Summary..." },
-  { id: "flashcards", icon: <Layers size={16} />, label: "Creating Flashcards..." },
-  { id: "quiz", icon: <ListChecks size={16} />, label: "Building AI Quiz..." },
-  { id: "mission", icon: <Target size={16} />, label: "Preparing Daily Mission..." },
-  { id: "analytics", icon: <BarChart3 size={16} />, label: "Updating Analytics..." },
+  { id: "upload", icon: <Upload size={15} />, label: "Upload Complete" },
+  { id: "reading", icon: <FileSearch size={15} />, label: "Reading document..." },
+  {
+    id: "extracting",
+    icon: <FileText size={15} />,
+    label: "Extracting important concepts...",
+  },
+  {
+    id: "summary",
+    icon: <BookOpen size={15} />,
+    label: "Generating Smart Summary...",
+  },
+  {
+    id: "flashcards",
+    icon: <Layers size={15} />,
+    label: "Creating Flashcards...",
+  },
+  {
+    id: "quiz",
+    icon: <Brain size={15} />,
+    label: "Building AI Quiz...",
+  },
+  {
+    id: "mission",
+    icon: <Target size={15} />,
+    label: "Preparing Daily Mission...",
+  },
+  {
+    id: "analytics",
+    icon: <BarChart3 size={15} />,
+    label: "Updating Analytics...",
+  },
 ];
 
 /* ─────────────── Helpers ─────────────── */

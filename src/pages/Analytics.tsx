@@ -13,9 +13,6 @@ import {
   Trophy,
   AlertTriangle,
   CheckCircle2,
-  XCircle,
-  Sparkles,
-  Layers,
 } from "lucide-react";
 import PageContainer from "../components/ui/PageContainer";
 import Card from "../components/ui/Card";
@@ -173,7 +170,7 @@ export default function Analytics() {
   const { user } = useAuth();
   const { documents } = useDocuments(isDemo ? null : user);
   const { stats } = useDashboardStats(isDemo ? null : user, documents.length);
-  const { weekly, hasWeeklyActivity, recentActivity, isLoading } = useAnalytics(isDemo ? null : user);
+  const { weekly, hasWeeklyActivity, recentActivity} = useAnalytics(isDemo ? null : user);
 
   // Demo mock data
   const demoStats = [
@@ -325,7 +322,7 @@ export default function Analytics() {
           </h2>
         </div>
         <Card>
-          <ActivityTimeline items={isDemo ? demoActivity : recentActivity} />
+          <ActivityTimeline items={isDemo ? demoActivity : recentActivity}/>
         </Card>
       </section>
 
@@ -338,4 +335,4 @@ export default function Analytics() {
       </div>
     </PageContainer>
   );
-}
+  }

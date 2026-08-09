@@ -25,6 +25,7 @@ import { useDemoMode } from "../context/DemoMode";
 import { useAuth } from "../context/AuthContext";
 import { useDocuments, type DocumentRow } from "../hooks/useDocuments";
 import { createNotification } from "../lib/notifications";
+import { extractTextFromPDF } from "../lib/pdf";
 
 /* ─────────────── Types ─────────────── */
 
@@ -415,6 +416,9 @@ export default function UploadPage() {
         );
         return;
       }
+      const extractedText = await extractTextFromPDF(file);
+
+console.log("PDF TEXT:", extractedText);
 
       setUploadingFile(file);
       setPhase("uploading");
@@ -440,7 +444,7 @@ export default function UploadPage() {
       setPhase("idle");
       setUploadingFile(null);
     },
-    [isDemo, showRestricted, uploadFile, showToast],
+    [isDemo, showRestricted, uploadFile, showToast, user],
   );
 
   const handleDelete = useCallback(

@@ -565,14 +565,14 @@ function DangerZoneSection() {
 
 function UpcomingFeaturesSection() {
   const features = [
-    { label: "AI Summary Generation", icon: Brain },
-    { label: "AI Flashcards", icon: GraduationCap },
-    { label: "AI Quiz Generator", icon: Sparkles },
-    { label: "Intelligent Study Recommendations", icon: Target },
-    { label: "Smart Learning Insights", icon: BarChart3 },
-    { label: "Personalized Revision Planner", icon: Clock },
-    { label: "OCR Improvements", icon: FileText },
-    { label: "Multi-language Support", icon: Globe },
+    { label: "AI Summary Generation", icon: Brain, status: "Live" },
+    { label: "AI Flashcards", icon: GraduationCap, status: "Live" },
+    { label: "AI Quiz Generator", icon: Sparkles, status: "Live" },
+    { label: "Intelligent Study Recommendations", icon: Target, status: "Coming Soon" },
+    { label: "Smart Learning Insights", icon: BarChart3, status: "Coming Soon" },
+    { label: "Personalized Revision Planner", icon: Clock, status: "Coming Soon" },
+    { label: "OCR Improvements", icon: FileText, status: "Coming Soon" },
+    { label: "Multi-language Support", icon: Globe, status: "Coming Soon" },
   ];
 
   return (
@@ -592,6 +592,7 @@ function UpcomingFeaturesSection() {
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {features.map((feature) => {
           const Icon = feature.icon;
+          const isLive = feature.status === "Live";
           return (
             <div
               key={feature.label}
@@ -603,8 +604,14 @@ function UpcomingFeaturesSection() {
               <span className="min-w-0 flex-1 text-sm font-medium text-foreground/80">
                 {feature.label}
               </span>
-              <span className="inline-flex shrink-0 items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary border border-primary/20">
-                Coming Soon
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                  isLive
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    : "bg-muted text-foreground/50"
+                }`}
+              >
+                {feature.status}
               </span>
             </div>
           );

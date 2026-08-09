@@ -50,7 +50,7 @@ export default function Toast({
           }`}
           aria-label="Dismiss notification"
         >
-          <X size={14} />
+          <X size={16} />
         </button>
       </div>
     </div>
