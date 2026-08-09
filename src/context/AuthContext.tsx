@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password,
         options: {
           data: { full_name: fullName },
-          emailRedirectTo: window.location.origin + "/dashboard",
+          emailRedirectTo: `${window.location.origin}/login`,
         },
       });
       if (error) return { error: toFriendlyAuthError(error), needsEmailConfirmation: false };
@@ -126,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const resetPassword = useCallback(
     async (email: string): Promise<{ error: string | null }> => {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + "/update-password",
+        redirectTo: `${window.location.origin}/update-password`,
       });
       if (error) return { error: toFriendlyAuthError(error) };
       return { error: null };
