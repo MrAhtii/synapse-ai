@@ -91,7 +91,11 @@ function Toggle({
 function AppearanceSection() {
   const { mode, setMode } = useTheme();
 
-  const options: { value: ThemeMode; label: string; icon: React.ElementType }[] = [
+  const options: {
+    value: ThemeMode;
+    label: string;
+    icon: React.ElementType;
+  }[] = [
     { value: "light", label: "Light Mode", icon: Sun },
     { value: "dark", label: "Dark Mode", icon: Moon },
     { value: "system", label: "System Default", icon: Monitor },
@@ -104,7 +108,9 @@ function AppearanceSection() {
           <Sun size={20} />
         </div>
         <div>
-          <h2 className="font-heading text-lg font-semibold text-foreground">Appearance</h2>
+          <h2 className="font-heading text-lg font-semibold text-foreground">
+            Appearance
+          </h2>
           <p className="mt-0.5 text-xs text-foreground/50">
             Choose how Synapse AI looks for you
           </p>
@@ -151,7 +157,10 @@ function AppearanceSection() {
                 </p>
               </div>
               {selected && (
-                <CheckCircle2 size={16} className="absolute right-3 top-3 text-primary" />
+                <CheckCircle2
+                  size={16}
+                  className="absolute right-3 top-3 text-primary"
+                />
               )}
             </button>
           );
@@ -178,10 +187,30 @@ function NotificationsSection() {
     desc: string;
     icon: React.ElementType;
   }[] = [
-    { key: "studyReminders", label: "Study Reminders", desc: "Get nudges to keep your study streak alive", icon: Bell },
-    { key: "dailyMissions", label: "Daily Mission Notifications", desc: "Be notified when new daily missions drop", icon: Target },
-    { key: "weeklyReport", label: "Weekly Progress Report", desc: "Receive a weekly summary of your learning stats", icon: BarChart3 },
-    { key: "achievements", label: "Achievement Notifications", desc: "Celebrate when you unlock a new badge", icon: Trophy },
+    {
+      key: "studyReminders",
+      label: "Study Reminders",
+      desc: "Get nudges to keep your study streak alive",
+      icon: Bell,
+    },
+    {
+      key: "dailyMissions",
+      label: "Daily Mission Notifications",
+      desc: "Be notified when new daily missions drop",
+      icon: Target,
+    },
+    {
+      key: "weeklyReport",
+      label: "Weekly Progress Report",
+      desc: "Receive a weekly summary of your learning stats",
+      icon: BarChart3,
+    },
+    {
+      key: "achievements",
+      label: "Achievement Notifications",
+      desc: "Celebrate when you unlock a new badge",
+      icon: Trophy,
+    },
   ];
 
   return (
@@ -191,7 +220,9 @@ function NotificationsSection() {
           <BellRing size={20} />
         </div>
         <div>
-          <h2 className="font-heading text-lg font-semibold text-foreground">Notifications</h2>
+          <h2 className="font-heading text-lg font-semibold text-foreground">
+            Notifications
+          </h2>
           <p className="mt-0.5 text-xs text-foreground/50">
             Control which notifications you receive
           </p>
@@ -210,8 +241,12 @@ function NotificationsSection() {
                 <Icon size={17} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground">{item.label}</p>
-                <p className="mt-0.5 text-xs text-foreground/50 leading-relaxed">{item.desc}</p>
+                <p className="text-sm font-medium text-foreground">
+                  {item.label}
+                </p>
+                <p className="mt-0.5 text-xs text-foreground/50 leading-relaxed">
+                  {item.desc}
+                </p>
               </div>
               <div className="shrink-0">
                 <Toggle
@@ -241,7 +276,9 @@ function LearningPreferencesSection() {
           <Brain size={20} />
         </div>
         <div>
-          <h2 className="font-heading text-lg font-semibold text-foreground">Learning Preferences</h2>
+          <h2 className="font-heading text-lg font-semibold text-foreground">
+            Learning Preferences
+          </h2>
           <p className="mt-0.5 text-xs text-foreground/50">
             Customise your learning experience
           </p>
@@ -251,7 +288,10 @@ function LearningPreferencesSection() {
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         {/* Daily Study Goal */}
         <div className="flex flex-col gap-2">
-          <label htmlFor="study-goal" className="flex items-center gap-2 text-sm font-medium text-foreground">
+          <label
+            htmlFor="study-goal"
+            className="flex items-center gap-2 text-sm font-medium text-foreground"
+          >
             <Clock size={15} className="text-foreground/50" />
             Daily Study Goal
           </label>
@@ -269,7 +309,16 @@ function LearningPreferencesSection() {
               ))}
             </select>
             <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="m6 9 6 6 6-6" />
               </svg>
             </div>
@@ -278,7 +327,10 @@ function LearningPreferencesSection() {
 
         {/* Quiz Difficulty */}
         <div className="flex flex-col gap-2">
-          <label htmlFor="quiz-difficulty" className="flex items-center gap-2 text-sm font-medium text-foreground">
+          <label
+            htmlFor="quiz-difficulty"
+            className="flex items-center gap-2 text-sm font-medium text-foreground"
+          >
             <BarChart3 size={15} className="text-foreground/50" />
             Quiz Difficulty
           </label>
@@ -294,7 +346,16 @@ function LearningPreferencesSection() {
               <option value="hard">Hard</option>
             </select>
             <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="m6 9 6 6 6-6" />
               </svg>
             </div>
@@ -317,13 +378,26 @@ function LearningPreferencesSection() {
   );
 }
 
-function AccountSection({ user, profile }: { user: import("@supabase/supabase-js").User | null; profile: import("../hooks/useProfile").Profile | null }) {
+function AccountSection({
+  user,
+  profile,
+}: {
+  user: import("@supabase/supabase-js").User | null;
+  profile: import("../hooks/useProfile").Profile | null;
+}) {
   const [isDemo] = useState(() => window.location.pathname.includes("/demo"));
 
-  const displayName = profile?.full_name ?? user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? "Synapse AI User";
+  const displayName =
+    profile?.full_name ??
+    user?.user_metadata?.full_name ??
+    user?.email?.split("@")[0] ??
+    "Synapse AI User";
   const displayEmail = user?.email ?? "—";
   const memberSince = profile?.created_at
-    ? new Date(profile.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    ? new Date(profile.created_at).toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      })
     : "—";
 
   return (
@@ -333,7 +407,9 @@ function AccountSection({ user, profile }: { user: import("@supabase/supabase-js
           <Shield size={20} />
         </div>
         <div>
-          <h2 className="font-heading text-lg font-semibold text-foreground">Account</h2>
+          <h2 className="font-heading text-lg font-semibold text-foreground">
+            Account
+          </h2>
           <p className="mt-0.5 text-xs text-foreground/50">
             Your account details and information
           </p>
@@ -341,24 +417,44 @@ function AccountSection({ user, profile }: { user: import("@supabase/supabase-js
       </div>
 
       <div className="mb-5 space-y-3.5">
-        <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-3">
+        <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-3 min-w-0">
           <User size={16} className="shrink-0 text-foreground/40" />
-          <span className="min-w-[5rem] text-xs font-medium text-foreground/50">Name</span>
-          <span className="text-sm font-medium text-foreground">{displayName}</span>
+          <span className="min-w-[5rem] shrink-0 text-xs font-medium text-foreground/50">
+            Name
+          </span>
+          <span className="text-sm font-medium text-foreground truncate min-w-0">
+            {displayName}
+          </span>
         </div>
-        <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-3">
+
+        {/* Email Row Fix */}
+        <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-3 min-w-0">
           <Mail size={16} className="shrink-0 text-foreground/40" />
-          <span className="min-w-[5rem] text-xs font-medium text-foreground/50">Email</span>
-          <span className="text-sm font-medium text-foreground">{displayEmail}</span>
+          <span className="min-w-[5rem] shrink-0 text-xs font-medium text-foreground/50">
+            Email
+          </span>
+          <span
+            className="text-sm font-medium text-foreground truncate min-w-0"
+            title={displayEmail}
+          >
+            {displayEmail}
+          </span>
         </div>
-        <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-3">
+
+        <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-3 min-w-0">
           <Calendar size={16} className="shrink-0 text-foreground/40" />
-          <span className="min-w-[5rem] text-xs font-medium text-foreground/50">Member Since</span>
-          <span className="text-sm font-medium text-foreground">{memberSince}</span>
+          <span className="min-w-[5rem] shrink-0 text-xs font-medium text-foreground/50">
+            Member Since
+          </span>
+          <span className="text-sm font-medium text-foreground truncate min-w-0">
+            {memberSince}
+          </span>
         </div>
-        <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-3">
+        <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-3 min-w-0">
           <Shield size={16} className="shrink-0 text-foreground/40" />
-          <span className="min-w-[5rem] text-xs font-medium text-foreground/50">Account Type</span>
+          <span className="min-w-[5rem] shrink-0 text-xs font-medium text-foreground/50">
+            Account Type
+          </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
             Free Plan
           </span>
@@ -401,7 +497,9 @@ function DataManagementSection() {
           <Trash2 size={20} />
         </div>
         <div>
-          <h2 className="font-heading text-lg font-semibold text-foreground">Data Management</h2>
+          <h2 className="font-heading text-lg font-semibold text-foreground">
+            Data Management
+          </h2>
           <p className="mt-0.5 text-xs text-foreground/50">
             Export or clear your learning data
           </p>
@@ -427,11 +525,7 @@ function DataManagementSection() {
             </>
           )}
         </Button>
-        <Button
-          variant="destructive"
-          onClick={handleClear}
-          className="flex-1"
-        >
+        <Button variant="destructive" onClick={handleClear} className="flex-1">
           <Trash2 size={16} />
           Clear Demo Data
         </Button>
@@ -454,8 +548,8 @@ function DataManagementSection() {
                   Clear all data?
                 </h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-foreground/60">
-                  This will remove all demo content, study notes, and progress. This
-                  action cannot be undone.
+                  This will remove all demo content, study notes, and progress.
+                  This action cannot be undone.
                 </p>
               </div>
               <div className="flex flex-col gap-2 sm:flex-row">
@@ -493,7 +587,9 @@ function DangerZoneSection() {
           <AlertTriangle size={20} />
         </div>
         <div>
-          <h2 className="font-heading text-lg font-semibold text-foreground">Danger Zone</h2>
+          <h2 className="font-heading text-lg font-semibold text-foreground">
+            Danger Zone
+          </h2>
           <p className="mt-0.5 text-xs text-foreground/50">
             Irreversible account actions
           </p>
@@ -503,7 +599,9 @@ function DangerZoneSection() {
       <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4">
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-foreground">Delete Account Permanently</p>
+            <p className="text-sm font-semibold text-foreground">
+              Delete Account Permanently
+            </p>
             <p className="mt-0.5 text-xs text-foreground/50">
               Remove your account and all associated data forever.
             </p>
@@ -532,10 +630,10 @@ function DangerZoneSection() {
                   Delete account?
                 </h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-foreground/60">
-                  Permanent account deletion is currently under development.
-                  In the final version this action will permanently remove your account,
-                  uploaded notes, AI data, quizzes, flashcards, analytics and all associated
-                  information.
+                  Permanent account deletion is currently under development. In
+                  the final version this action will permanently remove your
+                  account, uploaded notes, AI data, quizzes, flashcards,
+                  analytics and all associated information.
                 </p>
               </div>
               <div className="flex flex-col gap-2 sm:flex-row">
@@ -568,9 +666,21 @@ function UpcomingFeaturesSection() {
     { label: "AI Summary Generation", icon: Brain, status: "Live" },
     { label: "AI Flashcards", icon: GraduationCap, status: "Live" },
     { label: "AI Quiz Generator", icon: Sparkles, status: "Live" },
-    { label: "Intelligent Study Recommendations", icon: Target, status: "Coming Soon" },
-    { label: "Smart Learning Insights", icon: BarChart3, status: "Coming Soon" },
-    { label: "Personalized Revision Planner", icon: Clock, status: "Coming Soon" },
+    {
+      label: "Intelligent Study Recommendations",
+      icon: Target,
+      status: "Coming Soon",
+    },
+    {
+      label: "Smart Learning Insights",
+      icon: BarChart3,
+      status: "Coming Soon",
+    },
+    {
+      label: "Personalized Revision Planner",
+      icon: Clock,
+      status: "Coming Soon",
+    },
     { label: "OCR Improvements", icon: FileText, status: "Coming Soon" },
     { label: "Multi-language Support", icon: Globe, status: "Coming Soon" },
   ];
@@ -582,7 +692,9 @@ function UpcomingFeaturesSection() {
           <Rocket size={20} />
         </div>
         <div>
-          <h2 className="font-heading text-lg font-semibold text-foreground">Upcoming Features</h2>
+          <h2 className="font-heading text-lg font-semibold text-foreground">
+            Upcoming Features
+          </h2>
           <p className="mt-0.5 text-xs text-foreground/50">
             What&apos;s coming next to Synapse AI
           </p>
@@ -655,7 +767,18 @@ function VersionSection() {
             TypeScript
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-[11px] font-medium text-foreground/60">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            </svg>
             Supabase
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-medium text-primary border border-primary/20">
