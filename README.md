@@ -595,35 +595,6 @@ npm run preview
 
 ------------------------------------------------------------------------
 
-# ☁️ Deployment
-
-Synapse AI is designed to be deployed through Vercel using the GitHub
-repository.
-
-### Vercel configuration
-
-``` text
-Framework Preset: Vite
-Build Command: npm run build
-Output Directory: dist
-Install Command: npm install
-```
-
-Add the same environment variables in:
-
-**Vercel → Project → Settings → Environment Variables**
-
-``` text
-VITE_GEMINI_API_KEY
-VITE_SUPABASE_URL
-VITE_SUPABASE_ANON_KEY
-```
-
-After deployment, Vercel automatically builds the application and
-provides a production URL.
-
-------------------------------------------------------------------------
-
 # 🔒 Security Considerations
 
 Synapse AI uses Supabase authentication and database policies to isolate
