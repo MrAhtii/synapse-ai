@@ -736,7 +736,7 @@ The platform turns a static document into a complete learning loop:
 
 # 👨‍💻 Built With
 
-**Synapse AI** was developed as an AI-powered learning platform using:
+**Synapse AI** was built using *Native Builder* as the primary AI-assisted development platform and also using:
 
 -   React
 -   TypeScript
