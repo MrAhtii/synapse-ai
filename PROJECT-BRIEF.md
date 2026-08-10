@@ -10,7 +10,7 @@
 - AI: Google Gemini
 - Frontend: React + TypeScript
 - Backend: Supabase
-- Deployment: Vercel
+- Deployment: Vercel and Native Builder
 
 ## 💡 The Problem
 Students have notes, PDFs, and lectures scattered across different places,
